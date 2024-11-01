@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chat Interface</title>
     <style>
-        /* General styles */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -24,10 +23,10 @@
             background-color: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            display: none; /* Initially hide the chat container */
+            display: none;
         }
         #password-container {
-            display: block; /* Show password container first */
+            display: block;
         }
         #password-container h2 {
             margin-bottom: 15px;
@@ -35,7 +34,7 @@
             text-align: center;
         }
         #password-input {
-            width: calc(100% - 20px); /* Adjust width to prevent overflow */
+            width: calc(100% - 20px);
             padding: 10px;
             background-color: #333333;
             color: #e0e0e0;
@@ -66,23 +65,24 @@
             background-color: #1b1b1b;
         }
         .message {
-            padding: 10px;
+            padding: 10px 15px;
             margin: 8px 0;
             border-radius: 8px;
             max-width: 75%;
-            line-height: 1.4;
+            display: inline-block;
             word-wrap: break-word;
         }
         .user-message {
             background-color: #3a4a66;
-            text-align: right;
-            margin-left: auto;
             color: #e0f7fa;
+            text-align: right;
+            align-self: flex-end;
         }
         .ai-response {
             background-color: #333333;
-            text-align: left;
             color: #e0e0e0;
+            text-align: left;
+            align-self: flex-start;
         }
         #input-container {
             display: flex;
@@ -119,14 +119,12 @@
 </head>
 <body>
 
-<!-- Password prompt container -->
 <div id="password-container">
     <h2>Enter Password</h2>
     <input type="password" id="password-input" placeholder="Password">
     <button id="password-submit-button" onclick="checkPassword()">Submit</button>
 </div>
 
-<!-- Chat interface container -->
 <div id="chat-container">
     <div id="chat-box">
         <!-- AI responses and user messages will appear here -->
@@ -138,7 +136,6 @@
 </div>
 
 <script>
-    // Function to check the password and show the chat interface
     function checkPassword() {
         const password = document.getElementById('password-input').value;
         if (password === 'LOLNOTTHEPASSWORD') {
@@ -149,19 +146,16 @@
         }
     }
 
-    // Redirect to Clever on CTRL + Q press
     document.addEventListener('keydown', function(event) {
         if (event.ctrlKey && event.key === 'q') {
             window.location.href = "https://clever.com";
         }
     });
 
-    // Chat script
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const chatBox = document.getElementById('chat-box');
 
-    // Function to display messages in the chat box
     function displayMessage(message, isUser = false) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
@@ -171,7 +165,6 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Function to fetch AI response from the API
     async function fetchAIResponse(prompt) {
         const url = `https://tilki.dev/api/hercai?soru=${encodeURIComponent(prompt)}`;
         try {
@@ -184,23 +177,18 @@
         }
     }
 
-    // Event listener for the Send button
     sendButton.addEventListener('click', async () => {
         const userMessage = userInput.value.trim();
         if (!userMessage) return;
 
-        // Display user message
         displayMessage(userMessage, true);
         
-        // Clear input
         userInput.value = '';
 
-        // Fetch and display AI response
         const aiResponse = await fetchAIResponse(userMessage);
         displayMessage(aiResponse);
     });
 
-    // Allow Enter key to submit the message
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendButton.click();
