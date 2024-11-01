@@ -6,7 +6,7 @@
     <title>AI Chat Interface</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,25 +14,63 @@
             margin: 0;
             background-color: #121212;
             color: #e0e0e0;
+        }
+        #main-container {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        #sidebar {
+            width: 150px;
+            background-color: #2b2b2b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
             text-align: center;
+            color: #e0e0e0;
+            background-color: #3a4a66;
+            border-radius: 4px;
+            width: 80%;
+        }
+        .tab:hover {
+            background-color: #2e3d57;
+        }
+        .tab.active {
+            background-color: #1e1e1e;
+            font-weight: bold;
+        }
+        #content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
         }
         #password-header {
             font-size: 1.5em;
             margin-bottom: 10px;
         }
-        #password-container, #chat-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            border: 1px solid #333;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
         #password-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
         }
         #password-input {
             padding: 10px;
@@ -42,7 +80,7 @@
             border: 1px solid #555;
             border-radius: 4px;
             margin-bottom: 10px;
-            text-align: center; /* Centers the placeholder text */
+            text-align: center;
         }
         #submit-password {
             padding: 10px 20px;
@@ -52,8 +90,11 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        #submit-password:hover {
-            background-color: #2e3d57;
+        #chat-container, #humanizer-container {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
         }
         #chat-box {
             max-height: 400px;
@@ -107,33 +148,49 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        #send-button:hover {
-            background-color: #2e3d57;
+        #humanizer-text {
+            width: 100%;
+            padding: 10px;
+            background-color: #333333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
-        #chat-box::-webkit-scrollbar {
-            width: 8px;
-        }
-        #chat-box::-webkit-scrollbar-thumb {
-            background-color: #555;
+        #humanize-button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #3a4a66;
+            color: white;
+            cursor: pointer;
             border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-<div id="password-container">
-    <div id="password-header">Enter Password</div>
-    <input type="password" id="password-input" placeholder="Enter password..." />
-    <button id="submit-password">Submit</button>
-</div>
-
-<div id="chat-container" style="display: none;">
-    <div id="chat-box">
-        <!-- AI responses and user messages will appear here -->
+<div id="main-container">
+    <div id="sidebar">
+        <div class="tab active" id="tab-chat">AI Chat</div>
+        <div class="tab" id="tab-humanizer">AI Humanizer</div>
     </div>
-    <div id="input-container">
-        <input type="text" id="user-input" placeholder="Type your message..." />
-        <button id="send-button">Send</button>
+    <div id="content-container">
+        <div id="password-container">
+            <div id="password-header">Enter Password</div>
+            <input type="password" id="password-input" placeholder="Enter password..." />
+            <button id="submit-password">Submit</button>
+        </div>
+        <div id="chat-container">
+            <div id="chat-box"></div>
+            <div id="input-container">
+                <input type="text" id="user-input" placeholder="Type your message..." />
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+        <div id="humanizer-container">
+            <textarea id="humanizer-text" placeholder="Enter text to humanize..."></textarea>
+            <button id="humanize-button">Humanize</button>
+        </div>
     </div>
 </div>
 
@@ -143,7 +200,11 @@
     const submitPasswordButton = document.getElementById('submit-password');
     const passwordContainer = document.getElementById('password-container');
     const chatContainer = document.getElementById('chat-container');
-    
+    const humanizerContainer = document.getElementById('humanizer-container');
+    const chatTab = document.getElementById('tab-chat');
+    const humanizerTab = document.getElementById('tab-humanizer');
+
+    // Password verification
     submitPasswordButton.addEventListener('click', () => {
         if (passwordInput.value === correctPassword) {
             passwordContainer.style.display = 'none';
@@ -153,53 +214,41 @@
         }
     });
 
-    const userInput = document.getElementById('user-input');
-    const sendButton = document.getElementById('send-button');
-    const chatBox = document.getElementById('chat-box');
-
-    // Function to display messages in the chat box
-    function displayMessage(message, isUser = false) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', isUser ? 'user-message' : 'ai-response');
-        messageElement.textContent = message;
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Function to fetch AI response from the API
-    async function fetchAIResponse(prompt) {
-        const url = `https://tilki.dev/api/hercai?soru=${encodeURIComponent(prompt)}`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            return data.cevap;
-        } catch (error) {
-            console.error("Error fetching AI response:", error);
-            return "Sorry, there was an error getting the response.";
-        }
-    }
-
-    // Event listener for the Send button
-    sendButton.addEventListener('click', async () => {
-        const userMessage = userInput.value.trim();
-        if (!userMessage) return;
-        
-        // Display user message
-        displayMessage(userMessage, true);
-        
-        // Clear input
-        userInput.value = '';
-
-        // Fetch and display AI response
-        const aiResponse = await fetchAIResponse(userMessage);
-        displayMessage(aiResponse);
+    // Tab switching
+    chatTab.addEventListener('click', () => {
+        chatContainer.style.display = 'block';
+        humanizerContainer.style.display = 'none';
+        chatTab.classList.add('active');
+        humanizerTab.classList.remove('active');
     });
 
-    // Allow Enter key to submit the message
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendButton.click();
-        }
+    humanizerTab.addEventListener('click', () => {
+        chatContainer.style.display = 'none';
+        humanizerContainer.style.display = 'block';
+        humanizerTab.classList.add('active');
+        chatTab.classList.remove('active');
+    });
+
+    // Humanizer button functionality
+    const humanizeButton = document.getElementById('humanize-button');
+    const humanizerText = document.getElementById('humanizer-text');
+    humanizeButton.addEventListener('click', () => {
+        let text = humanizerText.value;
+
+        // Text Inflator (zero-width spaces)
+        text = text.split('').join('\u200B');
+
+        // All Uppercase to Lowercase
+        text = text.toLowerCase();
+
+        // No Commas and Semicolons
+        text = text.replace(/[,;]/g, '');
+
+        // Auto Submit and Copy on Paste
+        navigator.clipboard.writeText(text).then(() => {
+            humanizerText.value = ''; // Clear text
+            alert("Text humanized and copied to clipboard!");
+        });
     });
 
     // Redirect to clever.com on CTRL + Q
