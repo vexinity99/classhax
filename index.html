@@ -15,7 +15,7 @@
             background-color: #121212;
             color: #e0e0e0;
         }
-        #password-container, #chat-container {
+        #chat-container {
             width: 100%;
             max-width: 500px;
             padding: 20px;
@@ -23,37 +23,6 @@
             background-color: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            display: none;
-        }
-        #password-container {
-            display: block;
-        }
-        #password-container h2 {
-            margin-bottom: 15px;
-            color: #e0e0e0;
-            text-align: center;
-        }
-        #password-input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            background-color: #333333;
-            color: #e0e0e0;
-            border: 1px solid #555;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        #password-submit-button {
-            padding: 10px 20px;
-            width: 100%;
-            background-color: #3a4a66;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        #password-submit-button:hover {
-            background-color: #2e3a54;
         }
         #chat-box {
             max-height: 400px;
@@ -63,26 +32,28 @@
             margin-bottom: 10px;
             border-radius: 4px;
             background-color: #1b1b1b;
+            display: flex;
+            flex-direction: column;
         }
         .message {
-            padding: 10px 15px;
-            margin: 8px 0;
-            border-radius: 8px;
-            max-width: 75%;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 15px;
             display: inline-block;
+            max-width: 70%;
             word-wrap: break-word;
         }
         .user-message {
             background-color: #3a4a66;
             color: #e0f7fa;
-            text-align: right;
             align-self: flex-end;
+            text-align: right;
         }
         .ai-response {
             background-color: #333333;
             color: #e0e0e0;
-            text-align: left;
             align-self: flex-start;
+            text-align: left;
         }
         #input-container {
             display: flex;
@@ -106,7 +77,7 @@
             border-radius: 4px;
         }
         #send-button:hover {
-            background-color: #2e3a54;
+            background-color: #2e3d57;
         }
         #chat-box::-webkit-scrollbar {
             width: 8px;
@@ -119,12 +90,6 @@
 </head>
 <body>
 
-<div id="password-container">
-    <h2>Enter Password</h2>
-    <input type="password" id="password-input" placeholder="Password">
-    <button id="password-submit-button" onclick="checkPassword()">Submit</button>
-</div>
-
 <div id="chat-container">
     <div id="chat-box">
         <!-- AI responses and user messages will appear here -->
@@ -136,35 +101,20 @@
 </div>
 
 <script>
-    function checkPassword() {
-        const password = document.getElementById('password-input').value;
-        if (password === 'LOLNOTTHEPASSWORD') {
-            document.getElementById('password-container').style.display = 'none';
-            document.getElementById('chat-container').style.display = 'block';
-        } else {
-            alert('Incorrect password. Please try again.');
-        }
-    }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.ctrlKey && event.key === 'q') {
-            window.location.href = "https://clever.com";
-        }
-    });
-
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const chatBox = document.getElementById('chat-box');
 
+    // Function to display messages in the chat box
     function displayMessage(message, isUser = false) {
         const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.classList.add(isUser ? 'user-message' : 'ai-response');
+        messageElement.classList.add('message', isUser ? 'user-message' : 'ai-response');
         messageElement.textContent = message;
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    // Function to fetch AI response from the API
     async function fetchAIResponse(prompt) {
         const url = `https://tilki.dev/api/hercai?soru=${encodeURIComponent(prompt)}`;
         try {
@@ -177,18 +127,23 @@
         }
     }
 
+    // Event listener for the Send button
     sendButton.addEventListener('click', async () => {
         const userMessage = userInput.value.trim();
         if (!userMessage) return;
-
+        
+        // Display user message
         displayMessage(userMessage, true);
         
+        // Clear input
         userInput.value = '';
 
+        // Fetch and display AI response
         const aiResponse = await fetchAIResponse(userMessage);
         displayMessage(aiResponse);
     });
 
+    // Allow Enter key to submit the message
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendButton.click();
