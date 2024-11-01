@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chat Interface</title>
     <style>
+        /* General styles */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -15,7 +16,7 @@
             background-color: #121212;
             color: #e0e0e0;
         }
-        #chat-container {
+        #password-container, #chat-container {
             width: 100%;
             max-width: 500px;
             padding: 20px;
@@ -23,6 +24,37 @@
             background-color: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: none; /* Initially hide the chat container */
+        }
+        #password-container {
+            display: block; /* Show password container first */
+        }
+        #password-container h2 {
+            margin-bottom: 15px;
+            color: #e0e0e0;
+            text-align: center;
+        }
+        #password-input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        #password-submit-button {
+            padding: 10px 20px;
+            width: 100%;
+            background-color: #3a4a66;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #password-submit-button:hover {
+            background-color: #2e3a54;
         }
         #chat-box {
             max-height: 400px;
@@ -68,7 +100,7 @@
         #send-button {
             padding: 10px 20px;
             border: none;
-            background-color: #3a4a66; /* Matches user message bubble */
+            background-color: #3a4a66;
             color: white;
             cursor: pointer;
             border-radius: 4px;
@@ -87,6 +119,14 @@
 </head>
 <body>
 
+<!-- Password prompt container -->
+<div id="password-container">
+    <h2>Enter Password</h2>
+    <input type="password" id="password-input" placeholder="Password">
+    <button id="password-submit-button" onclick="checkPassword()">Submit</button>
+</div>
+
+<!-- Chat interface container -->
 <div id="chat-container">
     <div id="chat-box">
         <!-- AI responses and user messages will appear here -->
@@ -98,6 +138,25 @@
 </div>
 
 <script>
+    // Function to check the password and show the chat interface
+    function checkPassword() {
+        const password = document.getElementById('password-input').value;
+        if (password === 'LOLNOTTHEPASSWORD') {
+            document.getElementById('password-container').style.display = 'none';
+            document.getElementById('chat-container').style.display = 'block';
+        } else {
+            alert('Incorrect password. Please try again.');
+        }
+    }
+
+    // Redirect to Clever on CTRL + Q press
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key === 'q') {
+            window.location.href = "https://clever.com";
+        }
+    });
+
+    // Chat script
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const chatBox = document.getElementById('chat-box');
@@ -129,7 +188,7 @@
     sendButton.addEventListener('click', async () => {
         const userMessage = userInput.value.trim();
         if (!userMessage) return;
-        
+
         // Display user message
         displayMessage(userMessage, true);
         
